@@ -1,16 +1,16 @@
 import discord
 import asyncio
 import getpass
+import requests
+
+
 
 email = input("Enter email\n")
 password = getpass.getpass('Enter password\n')
-phrase = input ("Enter phrase that you want to say\n")
 
 messages_since_started_script = 0
 
 on = True
-
-bad_words = ['fuck', 'bitch', 'cunt', 'nigger', 'nigga', 'fucking', 'fag', 'faggot', 'shit', 'crap', 'bastard', 'douche']
 
 client = discord.Client()
 
@@ -41,7 +41,9 @@ async def on_message(message):
             on = True
             print("Starting bot")
             while on:
-                await client.send_message(message.channel, phrase)
+                r = requests.get(url = "https://icanhazdadjoke.com/", headers = {'Accept': 'application/json'})
+                response = r.json()
+                await client.send_message(destination = message.channel, content = response['joke'], tts = True)
                 messages_since_started_script += 1
                 await asyncio.sleep(60)
         elif message.content.startswith('!pause'):
@@ -49,8 +51,10 @@ async def on_message(message):
             on = False
         elif message.content.startswith('!status'):
             await client.send_message(message.channel, 'Your naughty ass has sent ' + str(messages_since_started_script) + ' since script started' )
-    elif message.server.name == 'LoL Chat':
-        if any(x in message.content.lower() for x in bad_words):
-            await client.send_message(destination = message.channel, content = 'Watch your profanity!', tts = True)
+        elif message.server.name == 'LoL Chat':
+            print('Checking' + message.content.lower())
+            profanityCheck = requests.get(url = 'http://www.purgomalum.com/service/containsprofanity?text=' + message.content.lower())
+            if profanityCheck.text == 'true' :
+                await client.send_message(destination = message.channel, content = 'Watch your profanity!', tts = True)
 
 client.run(email,password)
