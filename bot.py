@@ -54,7 +54,6 @@ async def on_message(message):
         elif message.server.name == 'LoL Chat':
             print('Checking' + message.content.lower())
             profanityCheck = requests.get(url = 'http://www.purgomalum.com/service/containsprofanity?text=' + message.content.lower())
-            profanityCheck.text == 'true'
             if profanityCheck.text == 'true' :
                 await client.send_message(destination = message.channel, content = 'Watch your profanity!', tts = True)
 
